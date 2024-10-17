@@ -1,0 +1,70 @@
+name: Deploy Cohere Toolkit (Frontend & Backend) to EKS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: "ap-south-1" 
+  ECR_REPOSITORY_BACKEND: "testdeployment/cohere_backend_deployment" 
+  ECR_REPOSITORY_FRONTEND: "testdeployment/cohere_frontend_deployment" 
+  EKS_CLUSTER_NAME: "cohere_deployment_cluster"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write 
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push backend image to Amazon ECR
+        id: build-backend-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd src/backend  # Navigate to backend directory (adjust if needed)
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG
+
+      - name: Build and push frontend image to Amazon ECR
+        id: build-frontend-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG
+
+      - name: Deploy to EKS
+        run: |
+          aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+          kubectl apply -f deployment-backend.yaml  # Apply backend deployment
+          kubectl apply -f deployment-frontend.yaml  # Apply frontend deployment
+          kubectl set image deployment/cohere-toolkit-backend cohere-toolkit-backend=$ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG 
+          kubectl set image deployment/cohere-toolkit-frontend cohere-toolkit-frontend=$ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG 
+          kubectl rollout status deployment/cohere-toolkit-backend --timeout=60s
+          kubectl rollout status deployment/cohere-toolkit-frontend --timeout=60s 
+
+      - name: Rollback on Deployment Failure
+        if: failure()
+        run: |
+          aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+          kubectl rollout undo deployment/cohere-toolkit-backend --to-revision=$(kubectl rollout history deployment/cohere-toolkit-backend | tail -n 2 | head -n 1 | awk '{print $1}')
+          kubectl rollout undo deployment/cohere-toolkit-frontend --to-revision=$(kubectl rollout history deployment/cohere-toolkit-frontend | tail -n 2 | head -n 1 | awk '{print $1}') 
