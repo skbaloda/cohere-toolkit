@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: <ECR_BACKEND_IMAGE_URL>  # Replace with the ECR image URL after pushing
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG  # Replace with the ECR image URL after pushing
         ports:
         - containerPort: 8000
         env:

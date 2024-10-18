@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: "testdeployment/cohere_frontend_deployment:latest"  # Replace with the ECR image URL after pushing
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG  # Replace with the ECR image URL after pushing
         ports:
         - containerPort: 4000
         env:
