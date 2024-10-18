@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: cohere-toolkit-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: cohere-toolkit-frontend
   template:
     metadata:
       labels:
-        app: frontend
+        app: cohere-toolkit-frontend
     spec:
       containers:
-      - name: frontend
+      - name: cohere-toolkit-frontend
         image: $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG  # Replace with the ECR image URL after pushing
         ports:
         - containerPort: 4000
@@ -35,10 +35,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend
+  name: cohere-toolkit-frontend
 spec:
   ports:
     - port: 4000
   selector:
-    app: frontend
+    app: cohere-toolkit-frontend
   type: ClusterIP
