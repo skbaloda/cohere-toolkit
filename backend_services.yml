@@ -13,7 +13,7 @@ spec:
         app: cohere-toolkit-backend
     spec:
       containers:
-      - name: backend
+      - name: cohere-toolkit-backend
         image: $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG  # Replace with the ECR image URL after pushing
         ports:
         - containerPort: 8000
