@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: "testdeployment/cohere_frontend_deployment:latest"  # Replace with the ECR image URL after pushing
+        ports:
+        - containerPort: 4000
+        env:
+        - name: API_HOSTNAME
+          value: "http://backend:8000"
+        - name: NEXT_PUBLIC_API_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: NEXT_PUBLIC_API_HOSTNAME
+        - name: NEXT_PUBLIC_FRONTEND_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: NEXT_PUBLIC_FRONTEND_HOSTNAME
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  ports:
+    - port: 4000
+  selector:
+    app: frontend
+  type: ClusterIP

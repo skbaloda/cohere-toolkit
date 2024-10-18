@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: <ECR_BACKEND_IMAGE_URL>  # Replace with the ECR image URL after pushing
+        ports:
+        - containerPort: 8000
+        env:
+        - name: INSTALL_COMMUNITY_DEPS
+          value: "false"
+        volumeMounts:
+        - mountPath: /workspace/src/backend/alembic
+          name: backend-alembic
+        - mountPath: /workspace/src/backend/data
+          name: backend-data
+      volumes:
+      - name: backend-alembic
+        persistentVolumeClaim:
+          claimName: backend-alembic-pvc
+      - name: backend-data
+        persistentVolumeClaim:
+          claimName: backend-data-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  ports:
+    - port: 8000
+  selector:
+    app: backend
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-alembic-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backend-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

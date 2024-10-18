@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
       - name: backend
-        image: <aws_account_id>.dkr.ecr.<region>.amazonaws.com/my-backend:latest
+        image: "testdeployment/cohere_backend_deployment:latest"
         ports:
         - containerPort: 8080
