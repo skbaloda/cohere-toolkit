@@ -60,7 +60,9 @@ jobs:
           kubectl apply -f frontend_services.yml 
           kubectl set image deployment/cohere-toolkit-backend cohere-toolkit-backend=$ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG 
           kubectl set image deployment/cohere-toolkit-frontend cohere-toolkit-frontend=$ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG 
-
+          kubectl rollout status deployment/cohere-toolkit-backend
+          kubectl rollout status deployment/cohere-toolkit-frontend
+          
       - name: Rollback on Deployment Failure
         if: failure()
         run: |
