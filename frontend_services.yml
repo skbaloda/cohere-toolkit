@@ -42,3 +42,12 @@ spec:
   selector:
     app: cohere-toolkit-frontend
   type: ClusterIP
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  NEXT_PUBLIC_API_HOSTNAME: "http://backend:8000"
+  NEXT_PUBLIC_FRONTEND_HOSTNAME: "http://frontend:4000"

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: cohere-toolkit-backend
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:latest  # Replace with the ECR image URL after pushing
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG  # Replace with the ECR image URL after pushing
         ports:
         - containerPort: 8000
         env:
@@ -56,8 +56,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: gp2  # Add this line for dynamic provisioning using AWS EBS
-
+  storageClassName: ebs-sc  # Add this line for dynamic provisioning using AWS EBS
 
 ---
 apiVersion: v1
@@ -70,4 +69,12 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: gp2  # Add this line for dynamic provisioning using AWS EBS
+  storageClassName: ebs-sc 
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata: 
+  name: ebs-sc
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer  # Add this line for dynamic provisioning using AWS EBS
