@@ -22,8 +22,12 @@ spec:
           value: "postgres"
         - name: POSTGRES_PASSWORD
           value: "postgres"
+        - name: POSTGRES_DB           
+          value: "toolkit"           
+        - name: PGDATA
+          value: /var/lib/postgresql/data/dbdata/dbsubdir  # Updated path
         volumeMounts:
-        - mountPath: /var/lib/postgresql/data
+        - mountPath: /var/lib/postgresql/data/dbdata  # Keep the original mount point
           name: db-storage
       volumes:
       - name: db-storage
@@ -54,3 +58,11 @@ spec:
     requests:
       storage: 1Gi
   storageClassName: ebs-sc 
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata: 
+  name: ebs-sc
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: cohere-toolkit-frontend
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG  # Replace with the ECR image URL after pushing
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$IMAGE_TAG # Replace with the ECR image URL after pushing
         ports:
         - containerPort: 4000
         env:
@@ -30,6 +30,12 @@ spec:
             configMapKeyRef:
               name: frontend-config
               key: NEXT_PUBLIC_FRONTEND_HOSTNAME
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: DATABASE_URL
+
 
 ---
 apiVersion: v1
@@ -39,9 +45,11 @@ metadata:
 spec:
   ports:
     - port: 4000
+      targetPort: 4000
+      protocol: TCP
   selector:
     app: cohere-toolkit-frontend
-  type: ClusterIP
+  type: LoadBalancer
 
 ---
 apiVersion: v1
@@ -51,3 +59,4 @@ metadata:
 data:
   NEXT_PUBLIC_API_HOSTNAME: "http://backend:8000"
   NEXT_PUBLIC_FRONTEND_HOSTNAME: "http://frontend:4000"
+  DATABASE_URL: "postgresql+psycopg2://postgres:postgres@db:5432/toolkit"
