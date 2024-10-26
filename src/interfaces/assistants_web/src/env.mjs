@@ -2,9 +2,12 @@
 import { createEnv } from '@t3-oss/env-nextjs';
 import z from 'zod';
 
+// const readVariable = (key) => {
+//   if (typeof window === 'undefined') return process.env[key];
+//   return window.__ENV[key];
+// };
 const readVariable = (key) => {
-  if (typeof window === 'undefined') return process.env[key];
-  return window.__ENV[key];
+  return process.env[key]; // Both server-side and client-side will use process.env
 };
 
 export const env = createEnv({

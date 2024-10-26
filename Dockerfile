@@ -34,7 +34,7 @@ WORKDIR /workspace
 COPY pyproject.toml poetry.lock ./
 
 # Install dependencies
-RUN pip3 install --no-cache-dir poetry==1.6.1 \
+RUN pip3 install --no-cache-dir poetry==1.6.1 --timeout=100\
     && poetry config installer.max-workers 10 \
     && poetry install \
     && (poetry cache clear --all --no-interaction PyPI || true) \
@@ -60,7 +60,7 @@ ENV NEXT_PUBLIC_API_HOSTNAME='/api'
 RUN npm install \
     && npm run next:build
 
-# Terrarium
+# Terrarium 
 WORKDIR /usr/src/app
 COPY --from=terrarium /usr/src/app/package*.json ./
 RUN npm install -g ts-node \

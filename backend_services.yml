@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: cohere-toolkit-backend
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG # Replace with the ECR image URL after pushing
+        image: 970547381476.dkr.ecr.ap-south-1.amazonaws.com/testdeployment/cohere_backend_deployment:cohere_backend_image # Replace with the ECR image URL after pushing
         ports:
         - containerPort: 8000
         env:
